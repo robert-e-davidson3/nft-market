@@ -180,15 +180,7 @@ contract NftMarketTest is Test {
         vm.stopPrank();
 
         // verify
-        assertEq(
-            address(market).balance,
-            0,
-            "Market balance should be 0 after taking fee"
-        );
-        assertEq(
-            owner.balance,
-            1 ether + (0.1 ether * 25 / 1000),
-            "Owner should have received the fee"
-        );
+        assertEq(address(market).balance, 0, "Market balance should be 0 after taking fee");
+        assertEq(owner.balance, 1 ether + (0.1 ether * 25 / 1000), "Owner should have received the fee");
     }
 }
