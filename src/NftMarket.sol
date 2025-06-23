@@ -12,19 +12,9 @@ contract NftMarket is Ownable {
     mapping(address => mapping(address => mapping(uint256 => uint256))) public nftsForSale;
 
     event NftListed(address indexed seller, address indexed nftAddress, uint256 indexed tokenId, uint256 price);
-    event NftSold(
-        address indexed seller,
-        address indexed nftAddress,
-        uint256 indexed tokenId,
-        uint256 price
-    );
-    event NftBought(
-        address indexed buyer,
-        address indexed nftAddress,
-        uint256 indexed tokenId,
-        uint256 price
-    );
-    event SaleCancelled(address indexed seller, address indexed nftAddress, uint256 indexed tokenId);
+    event NftSold(address indexed seller, address indexed nftAddress, uint256 indexed tokenId, uint256 price);
+    event NftBought(address indexed buyer, address indexed nftAddress, uint256 indexed tokenId, uint256 price);
+    event NftListingCancelled(address indexed seller, address indexed nftAddress, uint256 indexed tokenId);
 
     constructor() Ownable(msg.sender) {}
 
@@ -59,10 +49,10 @@ contract NftMarket is Ownable {
         emit NftBought(msg.sender, nftAddress, tokenId, price);
     }
 
-    function cancelSale(address nftAddress, uint256 tokenId) public {
+    function cancelListing(address nftAddress, uint256 tokenId) public {
         delete nftsForSale[msg.sender][nftAddress][tokenId];
         IERC721(nftAddress).transferFrom(address(this), msg.sender, tokenId);
-        emit SaleCancelled(msg.sender, nftAddress, tokenId);
+        emit NftListingCancelled(msg.sender, nftAddress, tokenId);
     }
 
     function takeFee() public onlyOwner {
