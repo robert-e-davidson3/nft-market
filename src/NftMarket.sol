@@ -5,8 +5,8 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract NftMarket is Ownable {
-    uint256 public fee = 25; // 25/1000 aka 2.5%
-    uint256 public minPrice = 0.001 ether;
+    uint256 constant fee = 25; // 25/1000 aka 2.5%
+    uint256 constant minPrice = 0.001 ether;
 
     // seller => nftAddress => tokenId => price
     mapping(address => mapping(address => mapping(uint256 => uint256))) public nftsForSale;
@@ -18,7 +18,7 @@ contract NftMarket is Ownable {
 
     constructor() Ownable(msg.sender) {}
 
-    function listForSale(address nftAddress, uint256 tokenId, uint256 price) public {
+    function listForSale(address nftAddress, uint256 tokenId, uint256 price) external {
         IERC721 nft = IERC721(nftAddress);
         require(nft.ownerOf(tokenId) == msg.sender, "You do not own this NFT");
         require(price >= minPrice, "Price must be at least 0.001 ether");
@@ -30,7 +30,7 @@ contract NftMarket is Ownable {
         emit NftListed(msg.sender, nftAddress, tokenId, price);
     }
 
-    function buy(address payable seller, address nftAddress, uint256 tokenId) public payable {
+    function buy(address payable seller, address nftAddress, uint256 tokenId) external payable {
         uint256 price = nftsForSale[seller][nftAddress][tokenId];
         require(price > 0, "NFT is not for sale");
 
@@ -49,13 +49,13 @@ contract NftMarket is Ownable {
         emit NftBought(msg.sender, nftAddress, tokenId, price);
     }
 
-    function cancelListing(address nftAddress, uint256 tokenId) public {
+    function cancelListing(address nftAddress, uint256 tokenId) external {
         delete nftsForSale[msg.sender][nftAddress][tokenId];
         IERC721(nftAddress).transferFrom(address(this), msg.sender, tokenId);
         emit NftListingCancelled(msg.sender, nftAddress, tokenId);
     }
 
-    function takeFee() public onlyOwner {
+    function takeFee() external onlyOwner {
         uint256 balance = address(this).balance;
         require(balance > 0, "No funds to withdraw");
         payable(owner()).transfer(balance);
