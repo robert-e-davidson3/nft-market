@@ -23,6 +23,7 @@ contract NftMarket is Ownable {
         require(nft.ownerOf(tokenId) == msg.sender, "You do not own this NFT");
         require(price >= minPrice, "Price must be at least 0.001 ether");
 
+        // Will revert if msg.sender does not own the NFT
         nft.transferFrom(msg.sender, address(this), tokenId);
 
         nftsForSale[msg.sender][nftAddress][tokenId] = price;
@@ -50,14 +51,14 @@ contract NftMarket is Ownable {
     }
 
     function cancelListing(address nftAddress, uint256 tokenId) external {
+        uint256 price = nftsForSale[msg.sender][nftAddress][tokenId];
+        require(price > 0, "NFT is not for sale");
         delete nftsForSale[msg.sender][nftAddress][tokenId];
         IERC721(nftAddress).transferFrom(address(this), msg.sender, tokenId);
         emit NftListingCancelled(msg.sender, nftAddress, tokenId);
     }
 
     function takeFee() external onlyOwner {
-        uint256 balance = address(this).balance;
-        require(balance > 0, "No funds to withdraw");
-        payable(owner()).transfer(balance);
+        payable(owner()).transfer(address(this).balance);
     }
 }
